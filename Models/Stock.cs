@@ -8,7 +8,10 @@ namespace api.Models
 {
     public class Stock
     {
+        // primary key
         public int Id { get; set; }
+
+        // value defaul is empty
         public string Symbol { get; set; } = string.Empty;
         public string CompanyName { get; set; } = string.Empty;
 
