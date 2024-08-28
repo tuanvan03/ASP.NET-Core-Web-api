@@ -39,17 +39,22 @@ namespace api.Repositories
 
         public Task<List<Stock>> GetAllStocks()
         {
-            return _context.Stocks.ToListAsync();
+            return _context.Stocks.Include(c => c.Comments).ToListAsync();
         }
 
         public async Task<Stock?> GetStockById(int id)
         {
-            var stock = await _context.Stocks.FindAsync(id);
+            var stock = await _context.Stocks.Include(c => c.Comments).FirstOrDefaultAsync(s => s.Id == id);
             if (stock == null)
             {
                 return null;
             }
             return stock;
+        }
+
+        public Task<bool> StockExists(int id)
+        {
+            return _context.Stocks.AnyAsync(s => s.Id == id);
         }
 
         public async Task<Stock?> UpdateStock(int id, StockUpdateModel stockUpdateModel)
