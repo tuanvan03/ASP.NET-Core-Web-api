@@ -40,7 +40,7 @@ namespace api.Repositories
 
         public async Task<List<Stock>> GetAllStocks(StockQuery query)
         {
-            var stock = _context.Stocks.Include(c => c.Comments).AsQueryable();
+            var stock = _context.Stocks.Include(c => c.Comments).AsQueryable(); // Defferded Execution
             if (!string.IsNullOrWhiteSpace(query.Symbol))
             {
                 stock = stock.Where(s => s.Symbol.Contains(query.Symbol));
@@ -50,7 +50,16 @@ namespace api.Repositories
                 stock = stock.Where(s => s.CompanyName.Contains(query.CompanyName));
             }
 
-            return await stock.ToListAsync();
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                if (query.SortBy.Equals("Symbol", StringComparison.OrdinalIgnoreCase))
+                {
+                    stock = query.IsDecending ? stock.OrderByDescending(s => s.Symbol) : stock.OrderBy(s => s.Symbol);
+                }
+            }
+
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+            return await stock.Skip(skipNumber).Take(query.PageSize).ToListAsync(); // Execute the query
         }
 
         public async Task<Stock?> GetStockById(int id)
